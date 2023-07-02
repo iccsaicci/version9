@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<NEKTAR>
+    <EXPANSIONS>
+        <E COMPOSITE="C[272,273]" NUMMODES="6" TYPE="MODIFIED" FIELDS="u,v,w" />
+        <E COMPOSITE="C[272,273]" NUMMODES="5" TYPE="MODIFIEDQUADPLUS1" FIELDS="p" />
+    </EXPANSIONS>
+    <CONDITIONS>
+        <SOLVERINFO>
+            <I PROPERTY="EQTYPE"            VALUE="UnsteadyNavierStokes" />
+            <I PROPERTY="SolverType"        VALUE="VelocityCorrectionScheme" />
+            <I PROPERTY="EvolutionOperator" VALUE="Nonlinear"/>
+            <I PROPERTY="AdvectionForm"     VALUE="Convective"/>
+            <I PROPERTY="Projection"        VALUE="Galerkin" />
+            <I PROPERTY="TimeIntegrationMethod" VALUE="IMEXOrder2" />
+            <I PROPERTY="GJPStabilisation" VALUE="SemiImplicit" />
+            <!--I PROPERTY="SpectralVanishingViscosity" VALUE="DGKernel" /-->
+        </SOLVERINFO>
+	
+	<GLOBALSYSSOLNINFO>
+	    <V VAR="u,v,w">
+                <!--I PROPERTY="GlobalSysSoln"              VALUE="XxtStaticCond" /-->
+                <I PROPERTY="GlobalSysSoln"           VALUE="IterativeStaticCond" />
+                <I PROPERTY="Preconditioner"          VALUE="LowEnergyBlock" />
+                <I PROPERTY="IterativeSolverTolerance" VALUE="1e-9"/>
+            </V>
+            <V VAR="p">
+                <!--I PROPERTY="GlobalSysSoln"              VALUE="XxtStaticCond" /-->
+                <I PROPERTY="GlobalSysSoln"   VALUE="IterativeStaticCond" />
+                <I PROPERTY="Preconditioner"          VALUE="LowEnergyBlock" />
+                <I PROPERTY="IterativeSolverTolerance" VALUE="1e-7"/>
+            </V>
+        </GLOBALSYSSOLNINFO>
+
+    <PARAMETERS>
+        <P> TimeStep      =    1.0e-3                                       </P> <!-- Time step -->   
+        <P> NumSteps      =    30000                                        </P> <!-- Number of step -->
+        <P> IO_CheckSteps =    5000                                        </P> <!-- Number of step to write the intermediate results -->
+        <P> IO_InfoSteps  =    100                                        </P> <!-- Number of step to print information -->
+        <P> IO_CFLSteps   =    100                                        </P> <!-- Number of step to print CFL number  -->
+        <P> Re            = 159                                   </P>
+        <P> Kinvis        = 1/Re             	                       </P>
+
+        <!--  
+             U: Free stream veloticy magnitude
+             U0 : x component of inlet velcoity
+             V0 : y component of inlet velcoity
+            -->
+        <P> U0          = 1    	                           </P>
+        <P> V0         = 0         	             </P>
+        <P> W0         = 0         	             </P>
+    </PARAMETERS> 
+    
+    <VARIABLES>
+        <V ID="0"> u </V>
+        <V ID="1"> v </V>
+        <V ID="2"> w </V>
+        <V ID="3"> p </V>
+    </VARIABLES>
+    <BOUNDARYREGIONS>
+        <B ID="0"> C[271] </B>    <!-- wall-->
+        <B ID="1"> C[269]       </B>      <!-- inflow -->
+        <B ID="2"> C[270]       </B>      <!-- outflow -->
+    </BOUNDARYREGIONS>
+    <BOUNDARYCONDITIONS>
+        <REGION REF="0"> <!-- wall -->
+            <D VAR="u" VALUE="0" />
+            <D VAR="v" VALUE="0" />
+            <D VAR="w" VALUE="0" />
+            <N VAR="p" USERDEFINEDTYPE="H" VALUE="0" />
+        </REGION>
+        <REGION REF="1"> <!-- inflow -->
+            <D VAR="u" VALUE="U0" />
+            <D VAR="v" VALUE="V0" />
+            <D VAR="w" VALUE="W0" />
+	    <N VAR="p" USERDEFINEDTYPE="H" VALUE="0" />  
+        </REGION>
+        <REGION REF="2"> <!-- outflow -->
+            <N VAR="u" USERDEFINEDTYPE="HOutflow" VALUE="0" />
+	    <N VAR="v" USERDEFINEDTYPE="HOutflow" VALUE="0" />
+        <N VAR="w" USERDEFINEDTYPE="HOutflow" VALUE="0" />
+	    <D VAR="p" USERDEFINEDTYPE="HOutflow" VALUE="0" />
+        </REGION>
+    </BOUNDARYCONDITIONS>
+      
+        <!-- Specify the initial condition -->
+        <FUNCTION NAME="InitialConditions">
+        <E VAR="u" VALUE="U0" />
+        <E VAR="v" VALUE="V0" />
+        <E VAR="w" VALUE="W0" />
+        <E VAR="p" VALUE="0.0" />     
+        </FUNCTION>
+    </CONDITIONS>
+    
+
+    <FILTERS> 
+        <FILTER TYPE="HistoryPoints">
+              <PARAM NAME="OutputFile">History</PARAM> <PARAM NAME="OutputFrequency">10</PARAM> <PARAM NAME="Points">
+                43.5 41.5 0.5
+                43.5 42.5 0.5
+                43.5 43.5 0.5
+	      </PARAM>
+	    </FILTER>
+    </FILTERS>
+
+</NEKTAR>
